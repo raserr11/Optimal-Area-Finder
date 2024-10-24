@@ -50,4 +50,5 @@ dist/
 build/
 
 data
+data/data_eng
 optim_area/data_eng_clean/
