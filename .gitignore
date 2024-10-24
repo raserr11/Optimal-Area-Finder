@@ -48,3 +48,6 @@ pip-delete-this-directory.txt
 *.egg-info/
 dist/
 build/
+
+data
+optim_area/data_eng_clean/

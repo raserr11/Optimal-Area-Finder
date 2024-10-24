@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Mi App de Plantas{% endblock %}</title>
+    <title>{% block title %}OAF{% endblock %}</title>
+    
+    <!-- Google Fonts para una fuente más estilizada -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         /* Reset de márgenes */
         * {
@@ -15,10 +19,10 @@
 
         /* Fondo de la pantalla que incluye la imagen borrosa */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif; /* Nueva fuente */
             height: 100vh;
             display: flex;
-            justify-content: center;
+            justify-content: center; /* Centrado por defecto */
             align-items: center;
             overflow: hidden;
             position: relative;
@@ -39,10 +43,10 @@
         /* Barra de navegación con color gris oscuro */
         .navbar {
             background-color: rgba(45, 45, 45, 0.9); /* Tono gris oscuro */
-            height: 120px;
+            height: 100px;
             display: flex;
-            justify-content: center; /* Logo centrado */
             align-items: center;
+            padding-left: 20px; /* Espacio a la izquierda para el logo */
             position: fixed;
             top: 0;
             width: 100%;
@@ -54,20 +58,46 @@
             background-color: green; /* Fondo verde */
             padding: 10px;
             border-radius: 15px; /* Bordes redondeados */
+            display: flex;
+            align-items: center;
         }
 
-        /* Logo de la app en la barra */
-        .navbar img {
-            height: 110px; /* Tamaño del logo */
+        /* Logo de la app, escalado sin afectar la caja verde */
+        .logo-container img {
+            height: 60px; /* Tamaño original del logo */
+            transform: scale(1.5); /* Escala el logo sin modificar el tamaño de la caja */
+            margin-right: -5px; /* Espacio entre el logo y el texto */
+        }
+
+        /* Estilo del nombre de la app */
+        .app-name {
+            color: white; /* Cambiamos el color a blanco */
+            font-size: 25px; /* Tamaño de fuente más grande */
+            font-weight: bold;
+            letter-spacing: 2px; /* Espaciado entre letras */
         }
 
         /* Contenido principal */
         .main-content {
-            text-align: center;
-            color: white;
             z-index: 2;
-            margin-top: 100px; /* Para evitar que el contenido quede bajo la barra */
             position: relative;
+            width: 100%; /* Tomar todo el ancho disponible */
+        }
+
+        /* Clase para centrar el contenido (home, input_data) */
+        .centered-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh; /* Ajusta la altura */
+        }
+
+        /* Clase para alinear el contenido a la izquierda (result) */
+        .left-content {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            padding: 20px;
         }
     </style>
 </head>
@@ -76,15 +106,16 @@
     <!-- Capa con la imagen borrosa de fondo -->
     <div class="background"></div>
 
-    <!-- Barra de navegación superior con el logo en una caja verde con bordes redondeados -->
+    <!-- Barra de navegación superior con el logo y nombre de la app -->
     <div class="navbar">
         <div class="logo-container">
             <img src="{% static 'optim_area/logo.png' %}" alt="Logo de la App">
+            <span class="app-name">OPTIMAL AREA FINDER</span>
         </div>
     </div>
 
     <!-- Contenido principal que aparecerá por encima del fondo -->
-    <div class="main-content">
+    <div class="main-content {% block content_class %}{% endblock %}">
         {% block content %}
         <!-- Aquí se insertará el contenido de cada vista específica -->
         {% endblock %}

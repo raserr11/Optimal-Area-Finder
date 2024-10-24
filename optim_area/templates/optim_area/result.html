@@ -1,0 +1,27 @@
+{% extends 'optim_area/base.html' %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+    <div style="display: flex; align-items: flex-start; padding-left: 0; padding-top: 20px; height: calc(100vh - 50px);">
+        <!-- Contenedor a la izquierda, alineado al borde izquierdo -->
+        <div style="background-color: rgba(45, 45, 45, 0.9); width: 300px; padding: 20px; border-radius: 10px; color: white; margin-left: 0; margin-top: 60px;">
+            <!-- Caja para el nombre de la planta con el color verde del logo -->
+            <div style="background-color: green; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: white; font-weight: bold;">{{ selected_plant|title }}</h2>
+            </div>
+
+            <!-- Datos adicionales con mayor tamaño de fuente y espaciado -->
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>Sunlight (hours):</strong> {{ sun_range.0 }} - {{ sun_range.1 }}</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>Temperature (ºC):</strong> {{ temp_range.0 }} - {{ temp_range.1 }}</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>Humidity (%):</strong> {{ humidity_range.0 }} - {{ humidity_range.1 }}</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>Sowing Date:</strong> {{ sowing_date }}</p>
+            <p style="font-size: 18px; margin-bottom: 15px;"><strong>Harvest Date:</strong> {{ harvest_date }}</p>
+        </div>
+
+        <!-- Contenedor para el mapa -->
+        <div style="background-color: rgba(45, 45, 45, 0.9); padding: 20px; border-radius: 10px; color: white; margin-left: 20px; margin-top: 60px; width: 100%; height: 90vh;">
+            <iframe src="{{ mapa_url }}" width="100%" height="100%" style="border:none;"></iframe>
+        </div>
+    </div>
+{% endblock %}

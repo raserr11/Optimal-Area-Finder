@@ -1,10 +1,13 @@
 {% extends 'optim_area/base.html' %}
 
-{% block title %}Bienvenida{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block content %}
-    <h1>Bienvenido a la App de Plantas</h1>
-    <a href="{% url 'home' %}">
-        <button>Iniciar análisis</button>
-    </a>
+    <div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
+        <a href="{% url 'input_data' %}" style="text-decoration: none;"> <!-- Eliminar el subrayado -->
+            <button style="padding: 25px 50px; font-size: 24px; background-color: grey; color: white; border: none; border-radius: 10px; cursor: pointer; width: 200px; height: 80px; display: flex; justify-content: center; align-items: center; font-family: 'Poppins', sans-serif; font-weight: bold;"> <!-- Negrita aplicada -->
+                Analyze OAF
+            </button>
+        </a>
+    </div>
 {% endblock %}
