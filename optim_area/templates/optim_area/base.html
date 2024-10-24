@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi App de Plantas{% endblock %}</title>
+    <style>
+        /* Reset de márgenes */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Fondo de la pantalla que incluye la imagen borrosa */
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Capa de la imagen de fondo */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("{% static 'optim_area/fondo_plantas.png' %}") no-repeat center center/cover;
+            filter: blur(10px); /* Efecto de desenfoque */
+            z-index: -1; /* Mantener el fondo debajo del contenido */
+        }
+
+        /* Barra de navegación con color gris oscuro */
+        .navbar {
+            background-color: rgba(45, 45, 45, 0.9); /* Tono gris oscuro */
+            height: 120px;
+            display: flex;
+            justify-content: center; /* Logo centrado */
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 10;
+        }
+
+        /* Caja para el logo con bordes redondeados y fondo verde */
+        .logo-container {
+            background-color: green; /* Fondo verde */
+            padding: 10px;
+            border-radius: 15px; /* Bordes redondeados */
+        }
+
+        /* Logo de la app en la barra */
+        .navbar img {
+            height: 110px; /* Tamaño del logo */
+        }
+
+        /* Contenido principal */
+        .main-content {
+            text-align: center;
+            color: white;
+            z-index: 2;
+            margin-top: 100px; /* Para evitar que el contenido quede bajo la barra */
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Capa con la imagen borrosa de fondo -->
+    <div class="background"></div>
+
+    <!-- Barra de navegación superior con el logo en una caja verde con bordes redondeados -->
+    <div class="navbar">
+        <div class="logo-container">
+            <img src="{% static 'optim_area/logo.png' %}" alt="Logo de la App">
+        </div>
+    </div>
+
+    <!-- Contenido principal que aparecerá por encima del fondo -->
+    <div class="main-content">
+        {% block content %}
+        <!-- Aquí se insertará el contenido de cada vista específica -->
+        {% endblock %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{% extends 'optim_area/base.html' %}
+
+{% block title %}Bienvenida{% endblock %}
+
+{% block content %}
+    <h1>Bienvenido a la App de Plantas</h1>
+    <a href="{% url 'home' %}">
+        <button>Iniciar análisis</button>
+    </a>
+{% endblock %}

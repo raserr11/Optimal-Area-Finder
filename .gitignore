@@ -1,0 +1,50 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+
+# Django
+*.log
+*.sqlite3
+db.sqlite3
+/media
+/staticfiles
+
+# Entornos virtuales
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Archivos de configuración de IDE
+.idea/
+.vscode/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+
+# Archivos de prueba
+*.coverage
+.coverage.*
+nosetests.xml
+*.cover
+*.log
+
+# Archivos de migración de Django
+*/migrations/*.py
+*/migrations/*.pyc
+!*/migrations/__init__.py
+
+# Archivos de cache de pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Otros
+*.egg-info/
+dist/
+build/
