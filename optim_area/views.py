@@ -2,7 +2,7 @@
 import json
 import os
 from django.shortcuts import render
-from .functions import calc_full  # Importamos tu función calc_full
+from .functions import get_predefined_plant_data, get_manual_plant_data, calculate_and_generate_map
 import folium
 import pandas as pd
 
@@ -50,71 +50,27 @@ def input_data(request):
     return render(request, 'optim_area/input_data.html', context)
 
 
-def result_view(request, plant):
-    # Ruta a los archivos JSON necesarios
+# views.py
+
+
+
+def result_view(request, plant=None):
     plants_json_path = os.path.join(os.path.dirname(__file__), 'predefined', 'plants_data.json')
     full_data_json_path = os.path.join(os.path.dirname(__file__), 'predefined', 'full_data2.json')
     stations_json_path = os.path.join(os.path.dirname(__file__), 'predefined', 'valid_stations_ds2.json')
 
-    # Cargar los datos de plantas
-    with open(plants_json_path, 'r') as file:
-        plants_data = json.load(file)
+    # Determinar si usar datos predefinidos o manuales
+    if plant:
+        L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2 = get_predefined_plant_data(plants_json_path, plant)
+    else:
+        L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2 = get_manual_plant_data(request)
 
-    # Obtener los datos de la planta seleccionada
-    plant_info = plants_data.get(plant)
-
-    # Extraer los parámetros de la planta predefinida
-    L_MIN, L_MAX = (plant_info['sun'])
-    T_MIN, T_MAX = plant_info['temp']
-    H_MIN, H_MAX = plant_info['humidity']
-    DATE1, DATE2 = plant_info['sowing'], plant_info['harvest']
-
-    # Añadir el año 2023 a las fechas
-    DATE1 = f"{DATE1}/2023"
-    DATE2 = f"{DATE2}/2023"
-
-    # Validar las fechas y convertirlas a formato de fecha
-    fecha1 = pd.to_datetime(DATE1, format="%d/%m/%Y")
-    fecha2 = pd.to_datetime(DATE2, format="%d/%m/%Y")
-    num_dias = (fecha2 - fecha1).days
-    PROP_DIA = 100 / num_dias
-
-    # Ejecutar la función calc_full() para obtener el diccionario con las estaciones y colores
-    stations_results = calc_full(full_data_json_path, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, PROP_DIA, DATE1, DATE2)
-
-    # Cargar los datos de ubicación de las estaciones
-    valid_stations_df = pd.read_json(stations_json_path)
-
-    # Crear el mapa con Folium (puedes usar las coordenadas y el zoom según prefieras)
-    mapa_positron = folium.Map(
-        location=[40.416775, -3.703790],  # Centrado en España
-        zoom_start=6,
-        tiles="CartoDB positron"
+    # Llamar a la función para calcular y generar el mapa
+    stations_results, mapa_url = calculate_and_generate_map(
+        full_data_json_path, stations_json_path, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2
     )
 
-    # Iterar sobre las estaciones y agregar marcadores al mapa
-    for index, row in valid_stations_df.iterrows():
-        station_code = row['code']
-        if station_code in stations_results:
-            color = stations_results[station_code]['color']
-            folium.CircleMarker(
-                location=[row['latitud'], row['longitud']],
-                radius=10,
-                color=color,
-                fill=True,
-                fill_color=color,
-                popup=row['nombre']
-            ).add_to(mapa_positron)
-
-    # Guardar el mapa en el directorio estático
-    static_dir = os.path.join(os.path.dirname(__file__), 'static', 'optim_area')
-    if not os.path.exists(static_dir):
-        os.makedirs(static_dir)
-    
-    mapa_path = os.path.join(static_dir, 'mapa.html')
-    mapa_positron.save(mapa_path)
-
-    # Pasar los resultados al template para mostrar el mapa y los datos de la planta
+    # Pasar los resultados al template
     context = {
         'selected_plant': plant,
         'sun_range': (L_MIN, L_MAX),
@@ -123,10 +79,10 @@ def result_view(request, plant):
         'sowing_date': DATE1,
         'harvest_date': DATE2,
         'stations_results': stations_results,
-        'mapa_url': '/static/optim_area/mapa.html'  # Ruta pública del mapa
+        'mapa_url': mapa_url
     }
-
     return render(request, 'optim_area/result.html', context)
+
 
 
 

@@ -139,12 +139,19 @@ def data_prep(data, DATE1, DATE2):
     df[columnas_mod] = df[columnas_mod].bfill()
     
     # Convertir las fechas de entrada en tipo datetime si no lo son
-    DATE1 = pd.to_datetime(DATE1)
-    DATE2 = pd.to_datetime(DATE2)
-    
-    # Filtrar el DataFrame según el intervalo de fechas
-    df = df[(df['fecha'] >= DATE1) & (df['fecha'] <= DATE2)]
-    
+    DATE1 = pd.to_datetime(DATE1, format="%d-%m-%Y")
+    DATE2 = pd.to_datetime(DATE2, format="%d-%m-%Y")
+
+    if DATE1 < DATE2:
+        # Filtrar el DataFrame según el intervalo de fechas
+        df = df[(df['fecha'] >= DATE1) & (df['fecha'] <= DATE2)]
+    else:
+        df1 = df[df['fecha'] >= DATE1]
+        df2 = df[df['fecha'] <= DATE1]
+
+        df = pd.concat([df1, df2], axis=0, ignore_index=True) 
+
+
     return df
 
 
@@ -194,3 +201,77 @@ def calc_full(json_data, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, PROP_DIA, DAT
         full_dict[k] = color_dict
 
     return full_dict
+
+# functions.py
+
+import os
+import json
+import pandas as pd
+import folium
+
+# Función para tomar datos de plantas predefinidas
+def get_predefined_plant_data(plants_json_path, plant):
+    with open(plants_json_path, 'r') as file:
+        plants_data = json.load(file)
+    plant_info = plants_data.get(plant)
+    L_MIN, L_MAX = plant_info['sun']
+    T_MIN, T_MAX = plant_info['temp']
+    H_MIN, H_MAX = plant_info['humidity']
+    DATE1, DATE2 = plant_info['sowing'], plant_info['harvest']
+    return L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2
+
+# Función para tomar datos de entrada manual
+def get_manual_plant_data(request):
+    L_MIN = float(request.POST.get('L_MIN'))
+    L_MAX = float(request.POST.get('L_MAX'))
+    T_MIN = float(request.POST.get('T_MIN'))
+    T_MAX = float(request.POST.get('T_MAX'))
+    H_MIN = float(request.POST.get('H_MIN'))
+    H_MAX = float(request.POST.get('H_MAX'))
+    DATE1 = request.POST.get('DATE1')
+    DATE2 = request.POST.get('DATE2')
+    return L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2
+
+# Función principal para realizar el cálculo y generar el mapa
+def calculate_and_generate_map(full_data_json_path, stations_json_path, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2):
+    # Procesar las fechas y calcular PROP_DIA
+    DATE11 = f"{DATE1}-2023"
+    DATE22 = f"{DATE2}-2023"
+    fecha1 = pd.to_datetime(DATE11, format="%d-%m-%Y")
+    fecha2 = pd.to_datetime(DATE22, format="%d-%m-%Y")
+    num_dias = (fecha2 - fecha1).days
+    PROP_DIA = 100 / num_dias
+
+    # Ejecutar el cálculo de las estaciones
+    stations_results = calc_full(full_data_json_path, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, PROP_DIA, DATE11, DATE22)
+    
+    # Generar el mapa
+    valid_stations_df = pd.read_json(stations_json_path)
+    mapa_positron = folium.Map(
+        location=[40.416775, -3.703790],
+        zoom_start=6,
+        tiles="CartoDB positron"
+    )
+
+    for index, row in valid_stations_df.iterrows():
+        station_code = row['code']
+        if station_code in stations_results:
+            color = stations_results[station_code]['color']
+            folium.CircleMarker(
+                location=[row['latitud'], row['longitud']],
+                radius=10,
+                color=color,
+                fill=True,
+                fill_color=color,
+                popup=row['nombre']
+            ).add_to(mapa_positron)
+
+    # Guardar el mapa
+    static_dir = os.path.join(os.path.dirname(__file__), 'static', 'optim_area')
+    if not os.path.exists(static_dir):
+        os.makedirs(static_dir)
+    mapa_path = os.path.join(static_dir, 'mapa.html')
+    mapa_positron.save(mapa_path)
+
+    return stations_results, '/static/optim_area/mapa.html'
+
