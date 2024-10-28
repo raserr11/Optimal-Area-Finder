@@ -4,34 +4,36 @@
 
 {% block content %}
     <div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
-        <div style="background-color: grey; width: 600px; padding: 20px; border-radius: 10px;">
+        <div style="background-color: grey; width: 700px; padding: 30px; border-radius: 10px;">
             <!-- Tabs -->
-            <div style="display: flex; justify-content: space-between;">
-                <button id="predefined-tab" onclick="showTab('predefined')" style="flex: 1; padding: 10px; background-color: lightgray; border: none; border-radius: 5px 0 0 5px; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: bold;">Predefined</button>
-                <button id="manual-tab" onclick="showTab('manual')" style="flex: 1; padding: 10px; background-color: white; border: none; border-radius: 0 5px 5px 0; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: bold;">Manual</button>
+            <div style="display: flex; justify-content: space-between; font-size: 18px;">
+                <button id="predefined-tab" onclick="showTab('predefined')" style="flex: 1; padding: 12px; background-color: lightgray; border: none; border-radius: 5px 0 0 5px; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: bold;">Predefined</button>
+                <button id="manual-tab" onclick="showTab('manual')" style="flex: 1; padding: 12px; background-color: white; border: none; border-radius: 0 5px 5px 0; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: bold;">Manual</button>
             </div>
 
             <!-- Predefined Plants Tab -->
-            <div id="predefined-content" style="margin-top: 20px;">
+            <div id="predefined-content" style="margin-top: 20px; font-size: 18px;">
                 <h3 style="font-weight: bold;">Select a predefined plant</h3>
                 <form method="POST">
                     {% csrf_token %}
                     <label for="plant" style="font-weight: bold;">Choose a plant:</label><br>
-                    <select id="plant" name="plant" style="width: 100%; padding: 8px; margin-top: 5px;">
+                    <select id="plant" name="plant" style="width: 100%; padding: 12px; margin-top: 5px; font-size: 18px; height: 50px;">
                         {% for plant, details in plants.items %}
                         <option value="{{ plant }}">{{ plant|title }}</option>
                         {% endfor %}
                     </select><br><br>
 
-                    <input type="submit" value="Submit" style="background-color: green; color: white; padding: 10px; border: none; cursor: pointer; width: 100%; border-radius: 5px;">
+                    <input type="submit" value="Submit" style="background-color: green; color: white; padding: 12px; border: none; cursor: pointer; width: 100%; border-radius: 5px; font-size: 18px;">
                 </form>
             </div>
 
             <!-- Manual Input Tab -->
-            <div id="manual-content" style="margin-top: 20px; display: none;">
+            <div id="manual-content" style="margin-top: 20px; display: none; font-size: 18px;">
                 <h3 style="font-weight: bold;">Enter Plant Data Manually</h3>
                 <form method="POST">
                     {% csrf_token %}
+                    <label for="plant_name" style="font-weight: bold;">Plant Name:</label><br>
+                    <input type="text" id="plant_name" name="plant_name" style="width: 100%; padding: 12px; margin-top: 5px; font-size: 16px; height: 40px;"><br><br>
                     <table style="width: 100%; margin-top: 20px;">
                         <tr>
                             <th></th>
@@ -40,30 +42,30 @@
                         </tr>
                         <tr>
                             <td><label for="sun_min">Sun (hours):</label></td>
-                            <td><input type="number" id="sun_min" name="sun_min" style="width: 100%;"></td>
-                            <td><input type="number" id="sun_max" name="sun_max" style="width: 100%;"></td>
+                            <td><input type="number" id="sun_min" name="sun_min" style="width: 100%; padding: 10px; font-size: 16px; height: 40px;"></td>
+                            <td><input type="number" id="sun_max" name="sun_max" style="width: 100%; padding: 10px; font-size: 16px; height: 40px;"></td>
                         </tr>
                         <tr>
                             <td><label for="temp_min">Temp (ºC):</label></td>
-                            <td><input type="number" id="temp_min" name="temp_min" style="width: 100%;"></td>
-                            <td><input type="number" id="temp_max" name="temp_max" style="width: 100%;"></td>
+                            <td><input type="number" id="temp_min" name="temp_min" style="width: 100%; padding: 10px; font-size: 16px; height: 40px;"></td>
+                            <td><input type="number" id="temp_max" name="temp_max" style="width: 100%; padding: 10px; font-size: 16px; height: 40px;"></td>
                         </tr>
                         <tr>
                             <td><label for="humidity_min">Humidity (%):</label></td>
-                            <td><input type="number" id="humidity_min" name="humidity_min" style="width: 100%;"></td>
-                            <td><input type="number" id="humidity_max" name="humidity_max" style="width: 100%;"></td>
+                            <td><input type="number" id="humidity_min" name="humidity_min" style="width: 100%; padding: 10px; font-size: 16px; height: 40px;"></td>
+                            <td><input type="number" id="humidity_max" name="humidity_max" style="width: 100%; padding: 10px; font-size: 16px; height: 40px;"></td>
                         </tr>
                         <tr>
                             <td><label for="sowing_date">Sowing Date (DD/MM):</label></td>
-                            <td colspan="2"><input type="text" id="sowing_date" name="sowing_date" placeholder="DD/MM" style="width: 100%;"></td>
+                            <td colspan="2"><input type="text" id="sowing_date" name="sowing_date" placeholder="DD/MM" style="width: 100%; padding: 10px; font-size: 16px; height: 40px;"></td>
                         </tr>
                         <tr>
                             <td><label for="harvest_date">Harvest Date (DD/MM):</label></td>
-                            <td colspan="2"><input type="text" id="harvest_date" name="harvest_date" placeholder="DD/MM" style="width: 100%;"></td>
+                            <td colspan="2"><input type="text" id="harvest_date" name="harvest_date" placeholder="DD/MM" style="width: 100%; padding: 10px; font-size: 16px; height: 40px;"></td>
                         </tr>
                     </table>
 
-                    <input type="submit" value="Submit" style="background-color: green; color: white; padding: 10px; border: none; cursor: pointer; width: 100%; border-radius: 5px;">
+                    <input type="submit" value="Submit" style="background-color: green; color: white; padding: 12px; border: none; cursor: pointer; width: 100%; border-radius: 5px; font-size: 18px;">
                 </form>
             </div>
         </div>

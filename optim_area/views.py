@@ -1,20 +1,12 @@
-# Vista para la página de entrada de datos
 import json
 import os
-from django.shortcuts import render
-from .functions import get_predefined_plant_data, get_manual_plant_data, calculate_and_generate_map
+from django.shortcuts import render, redirect
+from .functions import get_predefined_plant_data, calculate_and_generate_map
 import folium
 import pandas as pd
 
-# Create your views here.
-
 def home(request):
     return render(request, 'optim_area/home.html')
-
-
-from django.shortcuts import render, redirect
-import json
-import os
 
 def input_data(request):
     # Cargar los datos del archivo JSON de plantas
@@ -23,54 +15,53 @@ def input_data(request):
         plants_data = json.load(file)
     
     if request.method == 'POST':
-        # Ver si los datos son predefinidos o manuales
         if 'plant' in request.POST:  # Predefinido
             selected_plant = request.POST['plant']
             return redirect('result_view', plant=selected_plant)
         
         elif 'sun_min' in request.POST:  # Manual
-            sun_min = request.POST['sun_min']
-            sun_max = request.POST['sun_max']
-            temp_min = request.POST['temp_min']
-            temp_max = request.POST['temp_max']
-            humidity_min = request.POST['humidity_min']
-            humidity_max = request.POST['humidity_max']
-            sowing_date = request.POST['sowing_date']
-            harvest_date = request.POST['harvest_date']
+            plant_name = request.POST['plant_name']
+            manual_plant_data = {
+                "sun": [int(request.POST['sun_min']), int(request.POST['sun_max'])],
+                "temp": [int(request.POST['temp_min']), int(request.POST['temp_max'])],
+                "humidity": [int(request.POST['humidity_min']), int(request.POST['humidity_max'])],
+                "sowing": request.POST['sowing_date'],
+                "harvest": request.POST['harvest_date']
+            }
+            # Guardar manual_plant_data en la sesión
+            request.session['manual_plant_data'] = manual_plant_data
+            return redirect('result_view', plant=plant_name)
 
-            # Redirigir a la vista de resultados con los datos manuales
-            return redirect('result_view_manual', sun_min=sun_min, sun_max=sun_max, temp_min=temp_min,
-                            temp_max=temp_max, humidity_min=humidity_min, humidity_max=humidity_max,
-                            sowing_date=sowing_date, harvest_date=harvest_date)
-
-    # Si no se ha enviado el formulario, mostrarlo
     context = {
         'plants': plants_data
     }
     return render(request, 'optim_area/input_data.html', context)
-
-
-# views.py
-
-
 
 def result_view(request, plant=None):
     plants_json_path = os.path.join(os.path.dirname(__file__), 'predefined', 'plants_data.json')
     full_data_json_path = os.path.join(os.path.dirname(__file__), 'predefined', 'full_data2.json')
     stations_json_path = os.path.join(os.path.dirname(__file__), 'predefined', 'valid_stations_ds2.json')
 
-    # Determinar si usar datos predefinidos o manuales
-    if plant:
+    predef_plants = ['tomato', 'lettuce', 'cucumber', 'pepper', 'zucchini', 'carrot', 'broccoli', 'spinach', 'pumpkin', 'radish', 'eggplant', 'beetroot', 'onion', 'garlic', 'sweet_potato', 'corn']
+    
+    if plant and plant in predef_plants:
         L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2 = get_predefined_plant_data(plants_json_path, plant)
     else:
-        L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2 = get_manual_plant_data(request)
+        # Usar datos de la planta manual de la sesión
+        manual_data = request.session.get('manual_plant_data')
+        if not manual_data:
+            return redirect('input_data')
+        
+        L_MIN, L_MAX = manual_data['sun']
+        T_MIN, T_MAX = manual_data['temp']
+        H_MIN, H_MAX = manual_data['humidity']
+        DATE1 = manual_data['sowing']
+        DATE2 = manual_data['harvest']
 
-    # Llamar a la función para calcular y generar el mapa
     stations_results, mapa_url = calculate_and_generate_map(
         full_data_json_path, stations_json_path, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2
     )
 
-    # Pasar los resultados al template
     context = {
         'selected_plant': plant,
         'sun_range': (L_MIN, L_MAX),
@@ -82,6 +73,7 @@ def result_view(request, plant=None):
         'mapa_url': mapa_url
     }
     return render(request, 'optim_area/result.html', context)
+
 
 
 

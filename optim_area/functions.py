@@ -1,24 +1,9 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import json
-import requests
-import time
+import os
 import folium
-from pyproj import Proj, transform
-
-def traduc_coord(df):
-    # Definir el sistema de coordenadas UTM (zona 30N en este caso)
-    proj_utm = Proj(proj='utm', zone=30, ellps='WGS84')  # Cambia la zona UTM si es necesario
-    proj_wgs84 = Proj(proj='latlong', datum='WGS84')  # Sistema de coordenadas WGS84 (latitud y longitud)
-
-    # Función para convertir de UTM a latitud y longitud
-    def convertir_utm_a_latlon(utm_x, utm_y):
-        lon, lat = transform(proj_utm, proj_wgs84, utm_x, utm_y)
-        return lon, lat
-
-    # Supongamos que tienes las columnas 'coord_x' y 'coord_y' en tu DataFrame
-    df['longitud'], df['latitud'] = zip(*df.apply(lambda row: convertir_utm_a_latlon(row['longitud'], row['latitud']), axis=1))
+from pyproj import Proj
 
 
 # Función polinómica para calcular el crecimiento basado en las horas de sol
@@ -92,33 +77,6 @@ def total_crec(df, prop_dia, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX):
     total_crecimiento = lista_crec.sum()
     return total_crecimiento
 
-# Función para obtener los datos de entrada del usuario y calcular PROP_DIA
-def data_take():
-    plant_name = input('Introduce el nombre de la planta:')
-    crop_date1 = input('Fecha Siembra (YYYY-MM-DD):')
-    crop_date2 = input('Fecha Cosecha (YYYY-MM-DD):')
-
-    # Convertir fechas para calcular el número de días
-    fecha1 = pd.to_datetime(crop_date1)
-    fecha2 = pd.to_datetime(crop_date2)
-    num_dias = (fecha2 - fecha1).days
-
-    # Cálculo de la proporción diaria basado en los días de cosecha
-    prop_dia = 100 / num_dias
-
-    luz_min = float(input('Luz Mínima (horas):'))
-    luz_max = float(input('Luz Máxima (horas):'))
-
-    temp_min = float(input('Temperatura Mínima:'))
-    temp_max = float(input('Temperatura Máxima:'))
-
-    humed_min = float(input('Humedad Mínima:'))
-    humed_max = float(input('Humedad Máxima:'))
-
-    return plant_name, crop_date1, crop_date2, luz_min, luz_max, temp_min, temp_max, humed_min, humed_max, prop_dia
-
-# Función para preparar los datos del JSON
-import pandas as pd
 
 def data_prep(data, DATE1, DATE2):
     # Crear el DataFrame con las columnas necesarias
@@ -153,7 +111,6 @@ def data_prep(data, DATE1, DATE2):
 
 
     return df
-
 
 def color_gradient(value):
     # value debe estar entre 0 y 1
@@ -202,13 +159,6 @@ def calc_full(json_data, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, PROP_DIA, DAT
 
     return full_dict
 
-# functions.py
-
-import os
-import json
-import pandas as pd
-import folium
-
 # Función para tomar datos de plantas predefinidas
 def get_predefined_plant_data(plants_json_path, plant):
     with open(plants_json_path, 'r') as file:
@@ -220,17 +170,6 @@ def get_predefined_plant_data(plants_json_path, plant):
     DATE1, DATE2 = plant_info['sowing'], plant_info['harvest']
     return L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2
 
-# Función para tomar datos de entrada manual
-def get_manual_plant_data(request):
-    L_MIN = float(request.POST.get('L_MIN'))
-    L_MAX = float(request.POST.get('L_MAX'))
-    T_MIN = float(request.POST.get('T_MIN'))
-    T_MAX = float(request.POST.get('T_MAX'))
-    H_MIN = float(request.POST.get('H_MIN'))
-    H_MAX = float(request.POST.get('H_MAX'))
-    DATE1 = request.POST.get('DATE1')
-    DATE2 = request.POST.get('DATE2')
-    return L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2
 
 # Función principal para realizar el cálculo y generar el mapa
 def calculate_and_generate_map(full_data_json_path, stations_json_path, L_MIN, L_MAX, T_MIN, T_MAX, H_MIN, H_MAX, DATE1, DATE2):
